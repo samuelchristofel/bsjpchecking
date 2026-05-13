@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>BPJS Rekonsiliasi – Avian HR</title>
+<title>BPJS Checking – Avian HR</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;min-height:100vh;color:#333}
@@ -18,26 +18,35 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;min-heigh
 .topbar-left{font-weight:700;font-size:15px}
 .topbar-right{color:#a7f3c0;font-size:12px}
 .content{padding:24px;flex:1}
+
+/* Table Style (Common) */
+.table-section{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:20px}
+.table-header-custom{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f2f5}
+.table-header-title{font-size:16px;font-weight:700;color:#1a2332}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:#f8fafc;color:#1a2332;border-bottom:2px solid #f0f2f5}
+thead th{padding:12px 14px;text-align:left;font-weight:600;font-size:12px;text-transform:uppercase;color:#7a8fa6;letter-spacing:.5px}
+tbody tr{border-bottom:1px solid #f0f2f5;transition:background .15s}
+tbody tr:hover{background:#f8fafc}
+tbody td{padding:12px 14px;vertical-align:middle}
+
+/* Buttons */
+.btn-primary{background:#166935;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .2s}
+.btn-primary:hover{opacity:.9}
+.btn-outline{background:#fff;color:#166935;border:1.5px solid #166935;padding:7px 15px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-outline:hover{background:#f0fdf4}
+.action-btn-circle{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;border:none;cursor:pointer;margin-right:5px;transition:transform .1s}
+.action-btn-circle:active{transform:scale(.92)}
+.btn-edit{background:#0891b2;color:#fff}
+.btn-delete{background:#e11d48;color:#fff}
+
+/* Detail View Styles */
 .filter-card{background:#fff;border-radius:10px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:20px}
 .filter-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
 .filter-group{display:flex;flex-direction:column;gap:5px}
 .filter-group label{font-size:11px;font-weight:600;color:#7a8fa6;text-transform:uppercase;letter-spacing:.5px}
-.filter-group select, .filter-group input[type=number], .filter-group input[type=month], .filter-group input[type=date] {
-  padding: 8px 12px;
-  border: 1.5px solid #dde3eb;
-  border-radius: 7px;
-  font-size: 13px;
-  background: #fff;
-  color: #333;
-  outline: none;
-  cursor: pointer;
-  transition: border .2s;
-}
-.filter-group select:focus, .filter-group input:focus {
-  border-color: #166935;
-}
-.btn-search{padding:9px 22px;background:#166935;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
-.btn-search:hover{background:#1a7d40}
+.filter-group select, .filter-group input{padding:8px 12px;border:1.5px solid #dde3eb;border-radius:7px;font-size:13px;background:#fff;color:#333;outline:none;transition:border .2s}
+.filter-group select:focus, .filter-group input:focus{border-color:#166935}
 .cards-row{display:flex;gap:16px;margin-bottom:20px}
 .info-card{flex:1;background:#fff;border-radius:10px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .info-card-title{font-size:13px;font-weight:700;color:#1a2332;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #f0f2f5}
@@ -46,63 +55,28 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;min-heigh
 .info-row:last-child{border-bottom:none}
 .info-val{display:flex;align-items:center;gap:5px}
 .badge-down{color:#e53e3e;font-size:11px}
-.table-section{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden}
-.table-toolbar{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f2f5}
-.show-entries{display:flex;align-items:center;gap:8px;font-size:13px;color:#7a8fa6}
-.show-entries select{padding:3px 6px;border:1px solid #dde3eb;border-radius:5px;font-size:12px}
-.table-wrapper{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead{background:#166935;color:#fff}
-thead th{padding:12px 14px;text-align:left;font-weight:600;font-size:12px}
-thead th.center{text-align:center}
-tbody tr{border-bottom:1px solid #f0f2f5;transition:background .15s}
-tbody tr:hover{background:#f8fafc}
-tbody td{padding:9px 14px;vertical-align:middle}
-tbody td.center{text-align:center}
-.adj-select{padding:5px 10px;border:1px solid #dde3eb;border-radius:5px;font-size:13px;background:#fff;cursor:pointer;outline:none;min-width:60px}
-.adj-select:focus{border-color:#166935}
-.btn-delete{padding:4px 12px;background:#fff0f0;color:#e53e3e;border:1px solid #fca5a5;border-radius:5px;font-size:12px;cursor:pointer;transition:background .2s}
-.btn-delete:hover{background:#fee2e2}
-.add-row-btn-wrapper{padding:10px 14px;border-top:1px solid #f0f2f5}
-.btn-add-row{padding:6px 16px;background:#f0fdf4;color:#166935;border:1.5px dashed #86efac;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;transition:background .2s}
-.btn-add-row:hover{background:#dcfce7}
-.table-footer{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#7a8fa6;border-top:1px solid #f0f2f5}
-.pagination{display:flex;align-items:center;gap:6px}
-.page-btn{padding:5px 10px;border:1px solid #dde3eb;border-radius:5px;background:#fff;cursor:pointer;font-size:12px;transition:background .2s}
-.page-btn:hover,.page-btn.active{background:#166935;color:#fff;border-color:#166935}
+.adj-select{padding:5px 10px;border:1px solid #dde3eb;border-radius:5px;font-size:13px;background:#fff;outline:none;min-width:60px}
+.btn-add-row{padding:6px 16px;background:#f0fdf4;color:#166935;border:1.5px dashed #86efac;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;margin:10px 14px}
 .bottom-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-.btn-draft{padding:9px 18px;background:#fff;border:1.5px solid #166935;color:#166935;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600}
-.btn-finalize{padding:9px 18px;background:#166935;color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px}
-.btn-finalize:hover{background:#1a7d40}
 .hidden{display:none!important}
 
 /* Searchable dropdown */
-.search-dropdown-wrap{position:relative;width:180px}
-.search-dropdown-input{width:100%;padding:6px 10px;border:1.5px solid #dde3eb;border-radius:7px;font-size:13px;outline:none;cursor:pointer;background:#fff}
-.search-dropdown-input:focus{border-color:#166935}
-.search-dropdown-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid #dde3eb;border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:100;max-height:180px;overflow-y:auto;display:none}
+.search-dropdown-wrap{position:relative;width:100%}
+.search-dropdown-input{width:100%;padding:6px 10px;border:1.5px solid #dde3eb;border-radius:7px;font-size:13px;outline:none}
+.search-dropdown-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #dde3eb;border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:100;max-height:180px;overflow-y:auto;display:none}
 .search-dropdown-list.open{display:block}
-.search-dropdown-item{padding:7px 10px;font-size:13px;cursor:pointer;transition:background .1s}
+.search-dropdown-item{padding:7px 10px;font-size:13px;cursor:pointer}
 .search-dropdown-item:hover{background:#f0fdf4;color:#166935}
-.readonly-cell{background:#f8fafc;color:#666;font-size:13px}
+.readonly-cell{background:#f8fafc;color:#666}
 
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center}
-.modal-box{background:#fff;border-radius:12px;width:680px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal-box{background:#fff;border-radius:12px;width:680px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column}
 .modal-header{padding:16px 20px;border-bottom:1px solid #f0f2f5;display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:14px;font-weight:700;color:#1a2332}
-.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#7a8fa6;line-height:1}
-.modal-close:hover{color:#333}
+.modal-title{font-size:14px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#7a8fa6}
 .modal-body{padding:16px 20px;overflow-y:auto;flex:1}
-.modal-footer{padding:12px 20px;border-top:1px solid #f0f2f5;display:flex;justify-content:flex-end;gap:10px}
-.btn-export-modal{padding:8px 18px;background:#166935;color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-weight:600}
-.btn-export-modal:hover{background:#1a7d40}
-.modal-table{width:100%;border-collapse:collapse;font-size:13px}
-.modal-table thead{background:#166935;color:#fff}
-.modal-table thead th{padding:10px 12px;text-align:left;font-size:12px;font-weight:600}
-.modal-table tbody tr{border-bottom:1px solid #f0f2f5}
-.modal-table tbody tr:hover{background:#f8fafc}
-.modal-table tbody td{padding:9px 12px}
+.modal-footer{padding:12px 20px;border-top:1px solid #f0f2f5;display:flex;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -118,404 +92,348 @@ tbody td.center{text-align:center}
 
 <div class="main">
   <div class="topbar">
-    <div class="topbar-left">Rekonsiliasi BPJS</div>
+    <div class="topbar-left" id="topbarTitle">BPJS Checking List</div>
     <div class="topbar-right">IT40 · DUMMY ↑</div>
   </div>
 
   <div class="content">
-    <!-- Filter -->
-    <div class="filter-card">
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>BPJS</label>
-          <select id="selBpjs" onchange="onFilterChange()">
-            <option value="">-- Pilih BPJS --</option>
-            <option value="kesehatan">BPJS Kesehatan</option>
-            <option value="tk">BPJS TK</option>
-          </select>
+    
+    <!-- VIEW 1: LIST -->
+    <div id="view-list">
+      <div class="table-section">
+        <div class="table-header-custom">
+          <div class="table-header-title">List BPJS Checking</div>
+          <div style="display:flex; gap:8px">
+            <button class="btn-outline">🔍 Filter</button>
+            <button class="btn-outline">🔄 Reload</button>
+            <button class="btn-primary" onclick="showDetail(true)">➕ Add</button>
+          </div>
         </div>
-        <div class="filter-group">
-          <label>Site</label>
-          <select id="selSite">
-            <option value="AAP">AAP</option>
-            <option value="AAS">AAS</option>
-            <option value="AAC">AAC</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label id="lblPeriode">Periode</label>
-          <input type="month" id="selPeriode" value="2025-09" style="width:165px">
-        </div>
-        <button class="btn-search" onclick="applyFilter()">🔍 Tampilkan</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Tipe BPJS</th>
+              <th>Site</th>
+              <th>Periode</th>
+              <th style="width:120px">Action</th>
+            </tr>
+          </thead>
+          <tbody id="listTableBody">
+            <!-- Mock List Data -->
+            <tr>
+              <td>BPJS Kesehatan</td>
+              <td>AAP</td>
+              <td>September 2025</td>
+              <td>
+                <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'kesehatan', 'AAP', '2025-09')">📝</button>
+                <button class="action-btn-circle btn-delete">🗑️</button>
+              </td>
+            </tr>
+            <tr>
+              <td>BPJS TK</td>
+              <td>AAS</td>
+              <td>2025-08-20</td>
+              <td>
+                <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'tk', 'AAS', '2025-08-20')">📝</button>
+                <button class="action-btn-circle btn-delete">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Info Cards -->
-    <div id="infoCards" class="cards-row hidden">
-      <div id="cardKesehatan" class="info-card hidden">
-        <div class="info-card-title">BPJS Kesehatan</div>
-        <div class="info-row" onclick="openModal('Karyawan Masuk','kesehatan')"><span>Karyawan Masuk</span><span class="info-val"><span class="badge-down">▼</span>30</span></div>
-        <div class="info-row" onclick="openModal('Karyawan Masuk (Non Perusahaan)','kesehatan')"><span>Karyawan Masuk (Non Perusahaan)</span><span class="info-val"><span class="badge-down">▼</span>15</span></div>
-        <div class="info-row" onclick="openModal('Karyawan Keluar','kesehatan')"><span>Karyawan Keluar</span><span class="info-val"><span class="badge-down">▼</span>5</span></div>
-        <div class="info-row" onclick="openModal('Total Karyawan','kesehatan')"><span>Total Karyawan</span><span class="info-val"><span class="badge-down">▼</span>250</span></div>
-        <div class="info-row" onclick="openModal('Peserta BPJS Kesehatan (Non Perusahaan)','kesehatan')"><span>Peserta BPJS Kesehatan (Non Perusahaan)</span><span class="info-val"><span class="badge-down">▼</span>55</span></div>
-        <div class="info-row" onclick="openModal('Total Peserta BPJS Kesehatan','kesehatan')"><span>Total Peserta BPJS Kesehatan</span><span class="info-val"><span class="badge-down">▼</span>195</span></div>
+    <!-- VIEW 2: DETAIL (REKONSILIASI) -->
+    <div id="view-detail" class="hidden">
+      <div style="margin-bottom:16px">
+        <button class="btn-outline" onclick="showList()">⬅️ Kembali ke List</button>
       </div>
-      <!-- BPJS TK card -->
-      <div id="cardTK" class="info-card hidden">
-        <div class="info-card-title">BPJS TK</div>
-        <div class="info-row" onclick="openModal('Total Karyawan','tk')">
-          <span>Total Karyawan</span>
-          <span id="tk-total">250</span>
-        </div>
-        <div class="info-row" onclick="openModal('Peserta BPJS TK','tk')">
-          <span>Peserta BPJS TK</span>
-          <span>200</span>
-        </div>
-        <div class="info-row" onclick="openModal('Karyawan Masuk','tk')">
-          <span>Karyawan Masuk</span>
-          <span>45</span>
-        </div>
-        <div class="info-row" onclick="openModal('Karyawan Keluar','tk')">
-          <span>Karyawan Keluar</span>
-          <span>5</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- Table -->
-    <div id="tableSection" class="table-section hidden">
-      <div style="padding:16px 20px 0; font-size:15px; font-weight:700; color:#1a2332">Rekonsiliasi</div>
-      <div class="table-toolbar">
-        <div class="show-entries">Tampilkan
-          <select onchange="changeShow(this.value)"><option>5</option><option>10</option><option>25</option></select>
-          entries
+      <!-- Filter -->
+      <div class="filter-card">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>BPJS</label>
+            <select id="selBpjs" onchange="onFilterChange()">
+              <option value="">-- Pilih BPJS --</option>
+              <option value="kesehatan">BPJS Kesehatan</option>
+              <option value="tk">BPJS TK</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Site</label>
+            <select id="selSite">
+              <option value="AAP">AAP</option>
+              <option value="AAS">AAS</option>
+              <option value="AAC">AAC</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label id="lblPeriode">Periode</label>
+            <input type="month" id="selPeriode" value="2025-09" style="width:165px">
+          </div>
+          <button class="btn-primary" onclick="applyFilter()">🔍 Tampilkan</button>
         </div>
       </div>
-      <div class="table-wrapper">
-        <table id="mainTable">
+
+      <!-- Info Cards -->
+      <div id="infoCards" class="cards-row hidden">
+        <div id="cardKesehatan" class="info-card hidden">
+          <div class="info-card-title">BPJS Kesehatan</div>
+          <div class="info-row" onclick="openModal('Karyawan Masuk')"><span>Karyawan Masuk</span><span class="info-val"><span class="badge-down">▼</span>30</span></div>
+          <div class="info-row" onclick="openModal('Karyawan Masuk (Non Perusahaan)')"><span>Karyawan Masuk (Non Perusahaan)</span><span class="info-val"><span class="badge-down">▼</span>15</span></div>
+          <div class="info-row" onclick="openModal('Karyawan Keluar')"><span>Karyawan Keluar</span><span class="info-val"><span class="badge-down">▼</span>5</span></div>
+          <div class="info-row" onclick="openModal('Total Karyawan')"><span>Total Karyawan</span><span class="info-val"><span class="badge-down">▼</span>250</span></div>
+          <div class="info-row" onclick="openModal('Peserta BPJS Kesehatan (Non Perusahaan)')"><span>Peserta BPJS Kesehatan (Non Perusahaan)</span><span class="info-val"><span class="badge-down">▼</span>55</span></div>
+          <div class="info-row" onclick="openModal('Total Peserta BPJS Kesehatan')"><span>Total Peserta BPJS Kesehatan</span><span class="info-val"><span class="badge-down">▼</span>195</span></div>
+        </div>
+        <div id="cardTK" class="info-card hidden">
+          <div class="info-card-title">BPJS TK</div>
+          <div class="info-row" onclick="openModal('Total Karyawan')"><span>Total Karyawan</span><span id="tk-total">250</span></div>
+          <div class="info-row" onclick="openModal('Peserta BPJS TK')"><span>Peserta BPJS TK</span><span>200</span></div>
+          <div class="info-row" onclick="openModal('Karyawan Masuk')"><span>Karyawan Masuk</span><span>45</span></div>
+          <div class="info-row" onclick="openModal('Karyawan Keluar')"><span>Karyawan Keluar</span><span>5</span></div>
+        </div>
+      </div>
+
+      <!-- Reconciliation Table -->
+      <div id="tableSection" class="table-section hidden">
+        <div style="padding:16px 20px 0; font-size:15px; font-weight:700">Rekonsiliasi</div>
+        <table>
           <thead>
             <tr>
               <th>Nama</th>
               <th>NIK</th>
               <th>Departemen</th>
-              <th class="center">Adjustment</th>
+              <th style="text-align:center">Adjustment</th>
               <th>Remark</th>
-              <th class="center">Aksi</th>
+              <th style="text-align:center">Aksi</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
-      </div>
-      <div class="add-row-btn-wrapper">
         <button class="btn-add-row" onclick="addRow()">+ Tambah Baris</button>
       </div>
-      <div class="table-footer">
-        <div id="entryInfo"></div>
-        <div class="pagination">
-          <button class="page-btn">&#8249;</button>
-          <button class="page-btn active">1</button>
-          <button class="page-btn">&#8250;</button>
-        </div>
+
+      <div id="bottomActions" class="bottom-actions hidden">
+        <button class="btn-outline">Save as Draft</button>
+        <button class="btn-primary">🔒 Submit / Finalize</button>
       </div>
     </div>
 
-    <div id="bottomActions" class="bottom-actions hidden">
-      <button class="btn-draft">Save as Draft</button>
-      <button class="btn-finalize">🔒 Submit / Finalize</button>
-    </div>
   </div>
 </div>
 
-<!-- Detail Modal -->
-<div id="detailModal" class="modal-overlay hidden" onclick="closeModalOutside(event)">
+<!-- Modal -->
+<div id="detailModal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
     <div class="modal-header">
       <div class="modal-title" id="modalTitle">Detail</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <table class="modal-table">
+      <table id="modalTable">
         <thead><tr><th>Jenis</th><th>Nama</th><th>NIK</th><th>Departemen</th></tr></thead>
         <tbody id="modalTableBody"></tbody>
       </table>
     </div>
     <div class="modal-footer">
-      <button class="btn-export-modal" onclick="exportModal()">📥 Export Excel</button>
+      <button class="btn-primary" onclick="alert('Exported!')">📥 Export Excel</button>
     </div>
   </div>
 </div>
 
 <script>
-// Mock employee master data
+// Mock Data
 const employees = [
-  {nama:'Budi Santoso',    nik:'12345678', dept:'Produksi'},
-  {nama:'Siti Aminah',     nik:'87654321', dept:'Logistik'},
-  {nama:'Agus Prayitno',   nik:'11223344', dept:'HRD'},
-  {nama:'Dewi Lestari',    nik:'55667788', dept:'Finance'},
-  {nama:'Rizky Maulana',   nik:'99887766', dept:'IT'},
-  {nama:'Fauzi Hidayat',   nik:'13579246', dept:'Marketing'},
-  {nama:'Rina Kusuma',     nik:'24681357', dept:'Produksi'},
-  {nama:'Hendra Wijaya',   nik:'36912480', dept:'Logistik'},
-  {nama:'Nur Hasanah',     nik:'48302615', dept:'Finance'},
-  {nama:'Doni Pratama',    nik:'57193826', dept:'IT'},
-  {nama:'Eko Prasetyo',    nik:'62019485', dept:'Gudang'},
-  {nama:'Maya Indah',      nik:'73928154', dept:'Purchasing'},
-  {nama:'Taufik Ismail',   nik:'84736291', dept:'Produksi'},
-  {nama:'Yulianti',        nik:'95847362', dept:'Admin'},
-  {nama:'Andi Wijaya',     nik:'10293847', dept:'Produksi'},
-  {nama:'Siska Putri',     nik:'21304958', dept:'Logistik'},
-  {nama:'Bambang Heru',    nik:'32415069', dept:'Security'},
-  {nama:'Ani Suryani',     nik:'43526170', dept:'Maintenance'},
-  {nama:'Dedi Kurniawan',  nik:'54637281', dept:'Produksi'},
-  {nama:'Linda Sari',      nik:'65748392', dept:'Finance'},
-  {nama:'Reza Fahlevi',    nik:'76859403', dept:'IT'},
-  {nama:'Putri Wahyuni',   nik:'87960514', dept:'Marketing'},
-  {nama:'Adi Saputra',     nik:'98071625', dept:'Produksi'},
-  {nama:'Ratna Juwita',    nik:'09182736', dept:'Logistik'},
-  {nama:'Hadi Santoso',    nik:'11224455', dept:'Gudang'},
+  {nama:'Budi Santoso', nik:'12345678', dept:'Produksi'},
+  {nama:'Siti Aminah',  nik:'87654321', dept:'Logistik'},
+  {nama:'Agus Prayitno',nik:'11223344', dept:'HRD'},
+  {nama:'Dewi Lestari', nik:'55667788', dept:'Finance'},
+  {nama:'Rizky Maulana',nik:'99887766', dept:'IT'},
+  {nama:'Fauzi Hidayat',nik:'13579246', dept:'Marketing'},
+  {nama:'Rina Kusuma',  nik:'24681357', dept:'Produksi'},
+  {nama:'Hendra Wijaya',nik:'36912480', dept:'Logistik'},
+  {nama:'Nur Hasanah',  nik:'48302615', dept:'Finance'},
+  {nama:'Doni Pratama', nik:'57193826', dept:'IT'},
+  {nama:'Eko Prasetyo', nik:'62019485', dept:'Gudang'},
 ];
-
-// Mock modal detail data per category
-const mockDetails = {
-  'Karyawan Masuk':      employees.slice(0,5).map(e=>({...e,jenis:'Karyawan Masuk'})),
-  'Karyawan Masuk (Non Perusahaan)': employees.slice(2,5).map(e=>({...e,jenis:'Karyawan Masuk (Non Perusahaan)'})),
-  'Karyawan Keluar':     employees.slice(5,7).map(e=>({...e,jenis:'Karyawan Keluar'})),
-  'Total Karyawan':      employees.map(e=>({...e,jenis:'Total Karyawan'})),
-  'Peserta BPJS Kesehatan (Non Perusahaan)': employees.slice(3,8).map(e=>({...e,jenis:'Peserta Kes Non Perus.'})),
-  'Total Peserta BPJS Kesehatan': employees.slice(0,8).map(e=>({...e,jenis:'Peserta BPJS Kesehatan'})),
-  'Peserta BPJS TK':     employees.slice(0,7).map(e=>({...e,jenis:'Peserta BPJS TK'})),
-};
 
 let tableData = [
-  {nama:'Budi Santoso',nik:'12345678',dept:'Produksi',adj:'+',remark:'Penambahan data baru'},
-  {nama:'Siti Aminah', nik:'87654321',dept:'Logistik', adj:'-',remark:'Koreksi bulan lalu'},
+  {nama:'Budi Santoso', nik:'12345678', dept:'Produksi', adj:'+', remark:'New entry'},
+  {nama:'Siti Aminah',  nik:'87654321', dept:'Logistik', adj:'-', remark:'Correction'},
 ];
 
-const baseTotals = {
-  kesehatan: 250,
-  tk: 250
-};
+const baseTotals = { kesehatan: 250, tk: 250 };
 
-function updateCalculatedTotals() {
-  const bpjs = document.getElementById('selBpjs').value;
-  if(!bpjs) return;
-
-  let delta = 0;
-  tableData.forEach(row => {
-    if(row.adj === '+') delta++;
-    else if(row.adj === '-') delta--;
-  });
-
-  const finalVal = baseTotals[bpjs] + delta;
-
-  if(bpjs === 'kesehatan') {
-    // Di BPJS Kesehatan, Total Karyawan ada di baris ke-4 (index row ke-5 di HTML karena ada title)
-    // Selector nth-child(5) karena index 1 = title, 2=Masuk, 3=MasukNon, 4=Keluar, 5=Total
-    const el = document.querySelector('#cardKesehatan .info-row:nth-child(5) .info-val');
-    if(el) el.innerHTML = `<span class="badge-down">▼</span>${finalVal}`;
+// View Switching
+function showDetail(isAdd, bpjs='', site='', periode=''){
+  document.getElementById('view-list').classList.add('hidden');
+  document.getElementById('view-detail').classList.remove('hidden');
+  document.getElementById('topbarTitle').textContent = isAdd ? 'Add BPJS Checking' : 'Edit BPJS Checking';
+  
+  if(!isAdd){
+    document.getElementById('selBpjs').value = bpjs;
+    document.getElementById('selSite').value = site;
+    onFilterChange();
+    document.getElementById('selPeriode').value = periode;
+    applyFilter();
   } else {
-    const el = document.getElementById('tk-total');
-    if(el) el.textContent = finalVal;
+    resetDetail();
   }
 }
 
-// Active search dropdown state
-let activeDropdownRow = null;
+function showList(){
+  document.getElementById('view-list').classList.remove('hidden');
+  document.getElementById('view-detail').classList.add('hidden');
+  document.getElementById('topbarTitle').textContent = 'BPJS Checking List';
+}
 
+function resetDetail(){
+  document.getElementById('selBpjs').value = '';
+  document.getElementById('selSite').value = 'AAP';
+  onFilterChange();
+  document.getElementById('infoCards').classList.add('hidden');
+  document.getElementById('tableSection').classList.add('hidden');
+  document.getElementById('bottomActions').classList.add('hidden');
+  tableData = [];
+}
+
+// Logic Detail
 function onFilterChange(){
   const bpjs = document.getElementById('selBpjs').value;
-  const inputPeriode = document.getElementById('selPeriode');
-  const labelPeriode = document.getElementById('lblPeriode');
-
-  if(bpjs === 'tk') {
-    // Ubah jadi full date picker untuk TK
-    inputPeriode.type = 'date';
-    labelPeriode.textContent = 'Periode Cut Off';
-    // Default ke tanggal 20 jika baru pindah
-    if(inputPeriode.value.length <= 7) {
-      inputPeriode.value = inputPeriode.value + '-20';
-    }
-    inputPeriode.style.width = '165px';
+  const input = document.getElementById('selPeriode');
+  const label = document.getElementById('lblPeriode');
+  if(bpjs === 'tk'){
+    input.type = 'date';
+    label.textContent = 'Periode Cut Off';
+    if(input.value.length <= 7) input.value += '-20';
   } else {
-    // Balik ke month picker untuk Kesehatan
-    inputPeriode.type = 'month';
-    labelPeriode.textContent = 'Periode';
-    // Trim tanggal jika ada
-    if(inputPeriode.value.length > 7) {
-      inputPeriode.value = inputPeriode.value.substring(0,7);
-    }
-    inputPeriode.style.width = '165px';
+    input.type = 'month';
+    label.textContent = 'Periode';
+    if(input.value.length > 7) input.value = input.value.substring(0,7);
   }
 }
 
 function applyFilter(){
-  const bpjs    = document.getElementById('selBpjs').value;
-  const periode = document.getElementById('selPeriode').value;
-  if(!bpjs || !periode){
-    alert('Harap lengkapi semua filter terlebih dahulu.');
-    return;
-  }
+  const bpjs = document.getElementById('selBpjs').value;
+  if(!bpjs) return alert('Pilih BPJS!');
+  
   document.getElementById('infoCards').classList.remove('hidden');
-  document.getElementById('cardKesehatan').classList.add('hidden');
-  document.getElementById('cardTK').classList.add('hidden');
-  if(bpjs==='kesehatan') document.getElementById('cardKesehatan').classList.remove('hidden');
-  if(bpjs==='tk')        document.getElementById('cardTK').classList.remove('hidden');
+  document.getElementById('cardKesehatan').classList.toggle('hidden', bpjs !== 'kesehatan');
+  document.getElementById('cardTK').classList.toggle('hidden', bpjs !== 'tk');
 
-  // Hide table if BPJS TK
-  if(bpjs === 'tk') {
+  if(bpjs === 'tk'){
     document.getElementById('tableSection').classList.add('hidden');
     document.getElementById('bottomActions').classList.add('hidden');
   } else {
     document.getElementById('tableSection').classList.remove('hidden');
     document.getElementById('bottomActions').classList.remove('hidden');
     renderTable();
-    updateCalculatedTotals();
+  }
+  updateCalculatedTotals();
+}
+
+function updateCalculatedTotals(){
+  const bpjs = document.getElementById('selBpjs').value;
+  let delta = 0;
+  tableData.forEach(r => { if(r.adj==='+') delta++; else if(r.adj==='-') delta--; });
+  const final = baseTotals[bpjs || 'kesehatan'] + delta;
+  
+  if(bpjs === 'kesehatan'){
+    const el = document.querySelector('#cardKesehatan .info-row:nth-child(5) .info-val');
+    if(el) el.innerHTML = `<span class="badge-down">▼</span>${final}`;
+  } else {
+    const el = document.getElementById('tk-total');
+    if(el) el.textContent = final;
   }
 }
 
 function renderTable(){
   const tbody = document.getElementById('tableBody');
-  tbody.innerHTML='';
-  tableData.forEach((row,i)=>{
+  tbody.innerHTML = '';
+  tableData.forEach((row, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML=`
-      <td id="nama-cell-${i}"></td>
-      <td><input class="readonly-cell" style="border:none;background:#f8fafc;width:100%;font-size:13px;padding:2px 4px" id="nik-${i}" value="${row.nik}" readonly/></td>
-      <td><input class="readonly-cell" style="border:none;background:#f8fafc;width:100%;font-size:13px;padding:2px 4px" id="dept-${i}" value="${row.dept}" readonly/></td>
-      <td class="center">
-        <select class="adj-select" onchange="tableData[${i}].adj=this.value; updateCalculatedTotals();">
+    tr.innerHTML = `
+      <td style="position:relative" id="nama-cell-${i}"></td>
+      <td><input class="readonly-cell search-dropdown-input" id="nik-${i}" value="${row.nik}" readonly></td>
+      <td><input class="readonly-cell search-dropdown-input" id="dept-${i}" value="${row.dept}" readonly></td>
+      <td style="text-align:center">
+        <select class="adj-select" onchange="tableData[${i}].adj=this.value; updateCalculatedTotals()">
           <option value="-" ${row.adj==='-'?'selected':''}>-</option>
           <option value="+" ${row.adj==='+'?'selected':''}>+</option>
         </select>
       </td>
       <td ondblclick="editRemark(this,${i})" style="cursor:pointer">${row.remark}</td>
-      <td class="center"><button class="btn-delete" onclick="deleteRow(${i})">🗑 Delete</button></td>
+      <td style="text-align:center"><button class="btn-delete" style="padding:4px 8px; border-radius:4px" onclick="deleteRow(${i})">🗑️</button></td>
     `;
     tbody.appendChild(tr);
     buildSearchDropdown(i, row.nama);
   });
-  updateEntryInfo();
 }
 
-function buildSearchDropdown(i, currentNama){
+function buildSearchDropdown(i, name){
   const cell = document.getElementById(`nama-cell-${i}`);
-  cell.style.position='relative';
-  const wrap = document.createElement('div');
-  wrap.className='search-dropdown-wrap';
-  wrap.style.width='100%';
+  cell.innerHTML = `
+    <div class="search-dropdown-wrap">
+      <input type="text" class="search-dropdown-input" value="${name}" placeholder="Cari..." onfocus="this.nextElementSibling.classList.add('open')" onblur="setTimeout(()=>this.nextElementSibling.classList.remove('open'),200)" oninput="filterDrop(this)">
+      <div class="search-dropdown-list"></div>
+    </div>
+  `;
+  filterDrop(cell.querySelector('input'), i);
+}
 
-  const input = document.createElement('input');
-  input.type='text';
-  input.className='search-dropdown-input';
-  input.value=currentNama;
-  input.placeholder='Cari nama...';
-  input.autocomplete='off';
-
-  const list = document.createElement('div');
-  list.className='search-dropdown-list';
-
-  function populate(query){
-    list.innerHTML='';
-    const filtered = employees.filter(e=>e.nama.toLowerCase().includes(query.toLowerCase()));
-    if(!filtered.length){list.innerHTML='<div class="search-dropdown-item" style="color:#999">Tidak ditemukan</div>';return;}
-    filtered.forEach(e=>{
-      const item=document.createElement('div');
-      item.className='search-dropdown-item';
-      item.textContent=e.nama;
-      item.onclick=()=>{
-        input.value=e.nama;
-        tableData[i].nama=e.nama;
-        tableData[i].nik=e.nik;
-        tableData[i].dept=e.dept;
-        document.getElementById(`nik-${i}`).value=e.nik;
-        document.getElementById(`dept-${i}`).value=e.dept;
-        list.classList.remove('open');
-      };
-      list.appendChild(item);
-    });
-  }
-
-  input.addEventListener('focus',()=>{populate(input.value);list.classList.add('open');});
-  input.addEventListener('input',()=>{populate(input.value);list.classList.add('open');});
-  input.addEventListener('blur',()=>setTimeout(()=>list.classList.remove('open'),150));
-
-  wrap.appendChild(input);
-  wrap.appendChild(list);
-  cell.appendChild(wrap);
+function filterDrop(input, idx){
+  const list = input.nextElementSibling;
+  const q = input.value.toLowerCase();
+  list.innerHTML = '';
+  employees.filter(e => e.nama.toLowerCase().includes(q)).forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'search-dropdown-item';
+    div.textContent = e.nama;
+    div.onclick = () => {
+      input.value = e.nama;
+      tableData[idx].nama = e.nama;
+      tableData[idx].nik = e.nik;
+      tableData[idx].dept = e.dept;
+      document.getElementById(`nik-${idx}`).value = e.nik;
+      document.getElementById(`dept-${idx}`).value = e.dept;
+    };
+    list.appendChild(div);
+  });
 }
 
 function editRemark(cell, i){
-  if(cell.querySelector('input')) return;
   const v = tableData[i].remark;
-  cell.innerHTML=`<input value="${v}" style="border:1.5px solid #166935;border-radius:5px;padding:3px 8px;font-size:13px;width:100%;outline:none"
-    onblur="saveRemark(this,${i})" onkeydown="if(event.key==='Enter')this.blur()"/>`;
+  cell.innerHTML = `<input class="search-dropdown-input" value="${v}" onblur="tableData[${i}].remark=this.value; renderTable()">`;
   cell.querySelector('input').focus();
 }
 
-function saveRemark(input, i){
-  tableData[i].remark = input.value;
-  renderTable();
-}
-
-function deleteRow(i){
-  if(confirm('Hapus baris ini?')){
-    tableData.splice(i,1);
-    renderTable();
-    updateCalculatedTotals();
-  }
-}
-
 function addRow(){
-  tableData.push({nama:'',nik:'',dept:'',adj:'-',remark:''});
+  tableData.push({nama:'', nik:'', dept:'', adj:'-', remark:''});
   renderTable();
   updateCalculatedTotals();
 }
 
-function updateEntryInfo(){
-  const n=tableData.length;
-  document.getElementById('entryInfo').textContent=`Menampilkan 1–${n} dari ${n} entri`;
+function deleteRow(i){
+  tableData.splice(i,1);
+  renderTable();
+  updateCalculatedTotals();
 }
 
-function changeShow(v){}
-
-// Modal
-let currentModalData=[];
-
-function openModal(jenis){
-  currentModalData = mockDetails[jenis] || [];
-  document.getElementById('modalTitle').textContent = jenis;
+// Modal Logic
+function openModal(cat){
+  document.getElementById('modalTitle').textContent = cat;
   const tbody = document.getElementById('modalTableBody');
-  tbody.innerHTML='';
-  currentModalData.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${r.jenis}</td><td>${r.nama}</td><td>${r.nik}</td><td>${r.dept}</td>`;
-    tbody.appendChild(tr);
+  tbody.innerHTML = '';
+  employees.slice(0,5).forEach(e => {
+    tbody.innerHTML += `<tr><td>${cat}</td><td>${e.nama}</td><td>${e.nik}</td><td>${e.dept}</td></tr>`;
   });
-  if(!currentModalData.length){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#999;padding:20px">Tidak ada data</td></tr>';
-  }
   document.getElementById('detailModal').classList.remove('hidden');
 }
 
-function closeModal(){
-  document.getElementById('detailModal').classList.add('hidden');
-}
+function closeModal(){ document.getElementById('detailModal').classList.add('hidden'); }
 
-function closeModalOutside(e){
-  if(e.target.id==='detailModal') closeModal();
-}
-
-function exportModal(){
-  // Build CSV
-  let csv='Jenis,Nama,NIK,Departemen\n';
-  currentModalData.forEach(r=>{csv+=`${r.jenis},${r.nama},${r.nik},${r.dept}\n`;});
-  const blob=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='detail_bpjs.csv';
-  a.click();
-}
 </script>
 </body>
 </html>
