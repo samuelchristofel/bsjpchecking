@@ -30,6 +30,7 @@ thead th{padding:12px 14px;text-align:left;font-weight:600;font-size:12px;text-t
 tbody tr{border-bottom:1px solid #f0f2f5;transition:background .15s}
 tbody tr:hover{background:#f8fafc}
 tbody td{padding:12px 14px;vertical-align:middle}
+.action-cell{display:flex;gap:6px;align-items:center;white-space:nowrap}
 
 /* Buttons */
 .btn-primary{background:#166935;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .2s}
@@ -78,6 +79,19 @@ tbody td{padding:12px 14px;vertical-align:middle}
 .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#7a8fa6}
 .modal-body{padding:16px 20px;overflow-y:auto;flex:1}
 .modal-footer{padding:12px 20px;border-top:1px solid #f0f2f5;display:flex;justify-content:flex-end}
+/* Custom Month Picker */
+.month-picker-wrap{position:relative;width:160px}
+.month-picker-input{width:100%;padding:8px 12px;border:1.5px solid #dde3eb;border-radius:7px;font-size:13px;background:#fff;cursor:pointer;outline:none;display:flex;justify-content:space-between;align-items:center}
+.month-picker-input:focus{border-color:#166935}
+.month-picker-popover{position:absolute;top:calc(100% + 5px);left:0;background:#fff;border:1px solid #dde3eb;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:300;width:220px;padding:10px;display:none}
+.month-picker-popover.open{display:block}
+.month-picker-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 5px}
+.month-picker-year{font-weight:700;font-size:14px;color:#1a2332}
+.month-picker-nav{cursor:pointer;color:#166935;font-weight:700;padding:2px 6px}
+.month-picker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.month-item{padding:8px 0;text-align:center;font-size:12px;border-radius:5px;cursor:pointer;transition:background .1s}
+.month-item:hover{background:#f0fdf4;color:#166935}
+.month-item.active{background:#166935;color:#fff}
 </style>
 </head>
 <body>
@@ -125,17 +139,19 @@ tbody td{padding:12px 14px;vertical-align:middle}
               <td>BPJS Kesehatan</td>
               <td>AAP</td>
               <td>September 2025</td>
-              <td>
+              <td class="action-cell">
                 <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'kesehatan', 'AAP', '2025-09')"><i class="fas fa-pen-to-square"></i></button>
+                <button class="action-btn-circle btn-primary" style="background:#15803d" onclick="alert('Exporting to Excel...')"><i class="fas fa-file-excel"></i></button>
                 <button class="action-btn-circle btn-delete"><i class="fas fa-trash-can"></i></button>
               </td>
             </tr>
             <tr>
               <td>BPJS TK</td>
               <td>AAS</td>
-              <td>2025-08-20</td>
-              <td>
+              <td>Agustus 2025</td>
+              <td class="action-cell">
                 <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'tk', 'AAS', '2025-08-20')"><i class="fas fa-pen-to-square"></i></button>
+                <button class="action-btn-circle btn-primary" style="background:#15803d" onclick="alert('Exporting to Excel...')"><i class="fas fa-file-excel"></i></button>
                 <button class="action-btn-circle btn-delete"><i class="fas fa-trash-can"></i></button>
               </td>
             </tr>
@@ -170,8 +186,26 @@ tbody td{padding:12px 14px;vertical-align:middle}
             </select>
           </div>
           <div class="filter-group">
-            <label id="lblPeriode">Periode</label>
-            <input type="month" id="selPeriode" value="2025-09" style="width:165px">
+            <label>Periode</label>
+            <div class="month-picker-wrap">
+              <div class="month-picker-input" onclick="toggleMonthPicker()">
+                <span id="displayPeriode">September 2025</span>
+                <i class="fas fa-calendar-day" style="color:#7a8fa6"></i>
+              </div>
+              <div class="month-picker-popover" id="monthPopover">
+                <div class="month-picker-header">
+                  <span class="month-picker-nav" onclick="changePickerYear(-1)">❮</span>
+                  <span class="month-picker-year" id="pickerYear">2025</span>
+                  <span class="month-picker-nav" onclick="changePickerYear(1)">❯</span>
+                </div>
+                <div class="month-picker-grid" id="monthGrid"></div>
+              </div>
+              <input type="hidden" id="valPeriode" value="2025-09">
+            </div>
+          </div>
+          <div class="filter-group hidden" id="grpCutoff">
+            <label>Tanggal Cut Off</label>
+            <input type="date" id="selTanggal" style="width:160px" onclick="this.showPicker()">
           </div>
           <button class="btn-primary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Tampilkan</button>
         </div>
@@ -238,9 +272,6 @@ tbody td{padding:12px 14px;vertical-align:middle}
         <tbody id="modalTableBody"></tbody>
       </table>
     </div>
-    <div class="modal-footer">
-      <button class="btn-primary" onclick="alert('Exported!')"><i class="fas fa-file-export"></i> Export Excel</button>
-    </div>
   </div>
 </div>
 
@@ -303,31 +334,127 @@ function resetDetail(){
 // Logic Detail
 function onFilterChange(){
   const bpjs = document.getElementById('selBpjs').value;
-  const input = document.getElementById('selPeriode');
-  const label = document.getElementById('lblPeriode');
+  const grpCutoff = document.getElementById('grpCutoff');
 
-  // Sembunyikan hasil lama saat filter berubah
+  // Sembunyikan hasil lama
   document.getElementById('infoCards').classList.add('hidden');
   document.getElementById('tableSection').classList.add('hidden');
   document.getElementById('bottomActions').classList.add('hidden');
 
-  if(bpjs === 'tk'){
-    input.type = 'date';
-    label.textContent = 'Periode Cut Off';
-    if(input.value.length <= 7) input.value += '-20';
+  if(bpjs === 'tk') {
+    grpCutoff.classList.remove('hidden');
+    updateDays();
   } else {
-    input.type = 'month';
-    label.textContent = 'Periode';
-    if(input.value.length > 7) input.value = input.value.substring(0,7);
+    grpCutoff.classList.add('hidden');
   }
+}
+
+// Custom Picker State
+let pYear = 2025;
+let pMonth = 9; // 1-12
+let viewMode = 'month'; // 'month' or 'year'
+const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+function toggleMonthPicker(){
+  document.getElementById('monthPopover').classList.toggle('open');
+  viewMode = 'month';
+  renderPickerGrid();
+}
+
+function renderPickerGrid(){
+  const grid = document.getElementById('monthGrid');
+  const yearText = document.getElementById('pickerYear');
+  grid.innerHTML = '';
+  yearText.textContent = pYear;
+  
+  if(viewMode === 'month') {
+    yearText.style.cursor = 'pointer';
+    yearText.onclick = (e) => { e.stopPropagation(); viewMode = 'year'; renderPickerGrid(); };
+    monthNames.forEach((name, i) => {
+      const mNum = i + 1;
+      const div = document.createElement('div');
+      div.className = 'month-item' + (mNum === pMonth ? ' active' : '');
+      div.textContent = name.substring(0,3);
+      div.onclick = (e) => { e.stopPropagation(); selectMonth(mNum); };
+      grid.appendChild(div);
+    });
+  } else {
+    // Year Grid
+    yearText.style.cursor = 'default';
+    yearText.onclick = null;
+    const startYear = pYear - 4;
+    for(let y = startYear; y < startYear + 12; y++) {
+      const div = document.createElement('div');
+      div.className = 'month-item' + (y === pYear ? ' active' : '');
+      div.textContent = y;
+      div.onclick = (e) => { e.stopPropagation(); pYear = y; viewMode = 'month'; renderPickerGrid(); };
+      grid.appendChild(div);
+    }
+  }
+}
+
+function changePickerYear(delta){
+  event.stopPropagation();
+  if(viewMode === 'month') {
+    pYear += delta;
+  } else {
+    pYear += (delta * 12);
+  }
+  renderPickerGrid();
+}
+
+function selectMonth(m){
+  pMonth = m;
+  const mm = m < 10 ? '0' + m : m;
+  document.getElementById('valPeriode').value = `${pYear}-${mm}`;
+  document.getElementById('displayPeriode').textContent = `${monthNames[m-1]} ${pYear}`;
+  document.getElementById('monthPopover').classList.remove('open');
+  updateDays();
+}
+
+// Close picker when clicking outside
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.month-picker-wrap')){
+    document.getElementById('monthPopover').classList.remove('open');
+  }
+});
+
+function onFilterChange(){
+  const bpjs = document.getElementById('selBpjs').value;
+  const grpCutoff = document.getElementById('grpCutoff');
+
+  // Sembunyikan hasil lama
+  document.getElementById('infoCards').classList.add('hidden');
+  document.getElementById('tableSection').classList.add('hidden');
+  document.getElementById('bottomActions').classList.add('hidden');
+
+  if(bpjs === 'tk') {
+    grpCutoff.classList.remove('hidden');
+    updateDays();
+  } else {
+    grpCutoff.classList.add('hidden');
+  }
+}
+
+function updateDays(){
+  const val = document.getElementById('valPeriode').value;
+  if(!val) return;
+  const [y, m] = val.split('-').map(Number);
+  const inputTanggal = document.getElementById('selTanggal');
+  
+  const lastDay = new Date(y, m, 0).getDate();
+  const mm = m < 10 ? '0' + m : m;
+  inputTanggal.min = `${y}-${mm}-01`;
+  inputTanggal.max = `${y}-${mm}-${lastDay}`;
+  inputTanggal.value = `${y}-${mm}-20`;
 }
 
 function applyFilter(){
   const bpjs = document.getElementById('selBpjs').value;
-  const periode = document.getElementById('selPeriode').value;
+  const val = document.getElementById('valPeriode').value;
   
-  if(!bpjs || !periode) {
-    return alert('Harap pilih BPJS dan Periode terlebih dahulu!');
+  if(!bpjs || !val) {
+    return alert('Harap pilih semua filter terlebih dahulu!');
   }
   
   document.getElementById('infoCards').classList.remove('hidden');
@@ -376,7 +503,7 @@ function renderTable(){
         </select>
       </td>
       <td ondblclick="editRemark(this,${i})" style="cursor:pointer">${row.remark}</td>
-      <td style="text-align:center"><button class="btn-delete" style="padding:4px 8px; border-radius:4px" onclick="deleteRow(${i})"><i class="fas fa-trash-can"></i></button></td>
+      <td class="action-cell" style="text-align:center; justify-content:center"><button class="btn-delete" style="padding:4px 8px; border-radius:4px" onclick="deleteRow(${i})"><i class="fas fa-trash-can"></i></button></td>
     `;
     tbody.appendChild(tr);
     buildSearchDropdown(i, row.nama);
