@@ -92,6 +92,10 @@ tbody td{padding:12px 14px;vertical-align:middle}
 .month-item{padding:8px 0;text-align:center;font-size:12px;border-radius:5px;cursor:pointer;transition:background .1s}
 .month-item:hover{background:#f0fdf4;color:#166935}
 .month-item.active{background:#166935;color:#fff}
+.month-item.active{background:#166935;color:#fff}
+.badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.badge-draft{background:#fef9c3;color:#a16207}
+.badge-completed{background:#dcfce7;color:#15803d}
 </style>
 </head>
 <body>
@@ -120,7 +124,6 @@ tbody td{padding:12px 14px;vertical-align:middle}
           <div class="table-header-title">List BPJS Checking</div>
           <div style="display:flex; gap:8px">
             <button class="btn-outline"><i class="fas fa-filter"></i> Filter</button>
-            <button class="btn-outline"><i class="fas fa-rotate"></i> Reload</button>
             <button class="btn-primary" onclick="showDetail(true)"><i class="fas fa-plus"></i> Add</button>
           </div>
         </div>
@@ -130,6 +133,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
               <th>Tipe BPJS</th>
               <th>Site</th>
               <th>Periode</th>
+              <th>Status</th>
               <th style="width:120px">Action</th>
             </tr>
           </thead>
@@ -139,6 +143,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
               <td>BPJS Kesehatan</td>
               <td>AAP</td>
               <td>September 2025</td>
+              <td><span class="badge badge-completed">Completed</span></td>
               <td class="action-cell">
                 <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'kesehatan', 'AAP', '2025-09')"><i class="fas fa-pen-to-square"></i></button>
                 <button class="action-btn-circle btn-primary" style="background:#15803d" onclick="alert('Exporting to Excel...')"><i class="fas fa-file-excel"></i></button>
@@ -149,6 +154,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
               <td>BPJS TK</td>
               <td>AAS</td>
               <td>Agustus 2025</td>
+              <td><span class="badge badge-draft">Draft</span></td>
               <td class="action-cell">
                 <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'tk', 'AAS', '2025-08-20')"><i class="fas fa-pen-to-square"></i></button>
                 <button class="action-btn-circle btn-primary" style="background:#15803d" onclick="alert('Exporting to Excel...')"><i class="fas fa-file-excel"></i></button>
@@ -205,7 +211,11 @@ tbody td{padding:12px 14px;vertical-align:middle}
           </div>
           <div class="filter-group hidden" id="grpCutoff">
             <label>Tanggal Cut Off</label>
-            <input type="date" id="selTanggal" style="width:160px" onclick="this.showPicker()">
+            <div class="month-picker-input" style="width:110px" onclick="document.getElementById('selTanggal').showPicker()">
+              <span id="displayTanggal">20</span>
+              <i class="fas fa-calendar-day" style="color:#7a8fa6"></i>
+            </div>
+            <input type="date" id="selTanggal" style="position:absolute;visibility:hidden;width:0;height:0" onchange="onDateSelect(this)">
           </div>
           <button class="btn-primary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Tampilkan</button>
         </div>
@@ -447,6 +457,13 @@ function updateDays(){
   inputTanggal.min = `${y}-${mm}-01`;
   inputTanggal.max = `${y}-${mm}-${lastDay}`;
   inputTanggal.value = `${y}-${mm}-20`;
+  document.getElementById('displayTanggal').textContent = '20';
+}
+
+function onDateSelect(el){
+  if(!el.value) return;
+  const day = el.value.split('-')[2];
+  document.getElementById('displayTanggal').textContent = parseInt(day);
 }
 
 function applyFilter(){
