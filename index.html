@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BPJS Checking – Avian HR</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;min-height:100vh;color:#333}
@@ -84,10 +85,10 @@ tbody td{padding:12px 14px;vertical-align:middle}
 <div class="sidebar">
   <div class="sidebar-brand">🏢 Avian HR</div>
   <div class="sidebar-section">Menu</div>
-  <div class="sidebar-item">🏠 Dashboard</div>
+  <div class="sidebar-item"><i class="fas fa-house" style="width:18px"></i> Dashboard</div>
   <div class="sidebar-section">Payroll</div>
-  <div class="sidebar-item active">⚖️ BPJS Checking</div>
-  <div class="sidebar-item">📋 List Karyawan</div>
+  <div class="sidebar-item active"><i class="fas fa-scale-balanced" style="width:18px"></i> BPJS Checking</div>
+  <div class="sidebar-item"><i class="fas fa-users" style="width:18px"></i> List Karyawan</div>
 </div>
 
 <div class="main">
@@ -104,9 +105,9 @@ tbody td{padding:12px 14px;vertical-align:middle}
         <div class="table-header-custom">
           <div class="table-header-title">List BPJS Checking</div>
           <div style="display:flex; gap:8px">
-            <button class="btn-outline">🔍 Filter</button>
-            <button class="btn-outline">🔄 Reload</button>
-            <button class="btn-primary" onclick="showDetail(true)">➕ Add</button>
+            <button class="btn-outline"><i class="fas fa-filter"></i> Filter</button>
+            <button class="btn-outline"><i class="fas fa-rotate"></i> Reload</button>
+            <button class="btn-primary" onclick="showDetail(true)"><i class="fas fa-plus"></i> Add</button>
           </div>
         </div>
         <table>
@@ -125,8 +126,8 @@ tbody td{padding:12px 14px;vertical-align:middle}
               <td>AAP</td>
               <td>September 2025</td>
               <td>
-                <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'kesehatan', 'AAP', '2025-09')">📝</button>
-                <button class="action-btn-circle btn-delete">🗑️</button>
+                <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'kesehatan', 'AAP', '2025-09')"><i class="fas fa-pen-to-square"></i></button>
+                <button class="action-btn-circle btn-delete"><i class="fas fa-trash-can"></i></button>
               </td>
             </tr>
             <tr>
@@ -134,8 +135,8 @@ tbody td{padding:12px 14px;vertical-align:middle}
               <td>AAS</td>
               <td>2025-08-20</td>
               <td>
-                <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'tk', 'AAS', '2025-08-20')">📝</button>
-                <button class="action-btn-circle btn-delete">🗑️</button>
+                <button class="action-btn-circle btn-edit" onclick="showDetail(false, 'tk', 'AAS', '2025-08-20')"><i class="fas fa-pen-to-square"></i></button>
+                <button class="action-btn-circle btn-delete"><i class="fas fa-trash-can"></i></button>
               </td>
             </tr>
           </tbody>
@@ -146,7 +147,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
     <!-- VIEW 2: DETAIL (REKONSILIASI) -->
     <div id="view-detail" class="hidden">
       <div style="margin-bottom:16px">
-        <button class="btn-outline" onclick="showList()">⬅️ Kembali ke List</button>
+        <button class="btn-outline" onclick="showList()"><i class="fas fa-arrow-left"></i> Kembali ke List</button>
       </div>
 
       <!-- Filter -->
@@ -172,7 +173,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
             <label id="lblPeriode">Periode</label>
             <input type="month" id="selPeriode" value="2025-09" style="width:165px">
           </div>
-          <button class="btn-primary" onclick="applyFilter()">🔍 Tampilkan</button>
+          <button class="btn-primary" onclick="applyFilter()"><i class="fas fa-magnifying-glass"></i> Tampilkan</button>
         </div>
       </div>
 
@@ -212,7 +213,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
-        <button class="btn-add-row" onclick="addRow()">+ Tambah Baris</button>
+        <button class="btn-add-row" onclick="addRow()"><i class="fas fa-plus"></i> Tambah Baris</button>
       </div>
 
       <div id="bottomActions" class="bottom-actions hidden">
@@ -238,7 +239,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
       </table>
     </div>
     <div class="modal-footer">
-      <button class="btn-primary" onclick="alert('Exported!')">📥 Export Excel</button>
+      <button class="btn-primary" onclick="alert('Exported!')"><i class="fas fa-file-export"></i> Export Excel</button>
     </div>
   </div>
 </div>
@@ -304,6 +305,12 @@ function onFilterChange(){
   const bpjs = document.getElementById('selBpjs').value;
   const input = document.getElementById('selPeriode');
   const label = document.getElementById('lblPeriode');
+
+  // Sembunyikan hasil lama saat filter berubah
+  document.getElementById('infoCards').classList.add('hidden');
+  document.getElementById('tableSection').classList.add('hidden');
+  document.getElementById('bottomActions').classList.add('hidden');
+
   if(bpjs === 'tk'){
     input.type = 'date';
     label.textContent = 'Periode Cut Off';
@@ -317,7 +324,11 @@ function onFilterChange(){
 
 function applyFilter(){
   const bpjs = document.getElementById('selBpjs').value;
-  if(!bpjs) return alert('Pilih BPJS!');
+  const periode = document.getElementById('selPeriode').value;
+  
+  if(!bpjs || !periode) {
+    return alert('Harap pilih BPJS dan Periode terlebih dahulu!');
+  }
   
   document.getElementById('infoCards').classList.remove('hidden');
   document.getElementById('cardKesehatan').classList.toggle('hidden', bpjs !== 'kesehatan');
@@ -365,7 +376,7 @@ function renderTable(){
         </select>
       </td>
       <td ondblclick="editRemark(this,${i})" style="cursor:pointer">${row.remark}</td>
-      <td style="text-align:center"><button class="btn-delete" style="padding:4px 8px; border-radius:4px" onclick="deleteRow(${i})">🗑️</button></td>
+      <td style="text-align:center"><button class="btn-delete" style="padding:4px 8px; border-radius:4px" onclick="deleteRow(${i})"><i class="fas fa-trash-can"></i></button></td>
     `;
     tbody.appendChild(tr);
     buildSearchDropdown(i, row.nama);
