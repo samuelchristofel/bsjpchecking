@@ -22,7 +22,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;min-heigh
 .filter-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
 .filter-group{display:flex;flex-direction:column;gap:5px}
 .filter-group label{font-size:11px;font-weight:600;color:#7a8fa6;text-transform:uppercase;letter-spacing:.5px}
-.filter-group select, .filter-group input[type=number], .filter-group input[type=month] {
+.filter-group select, .filter-group input[type=number], .filter-group input[type=month], .filter-group input[type=date] {
   padding: 8px 12px;
   border: 1.5px solid #dde3eb;
   border-radius: 7px;
@@ -112,7 +112,7 @@ tbody td.center{text-align:center}
   <div class="sidebar-section">Menu</div>
   <div class="sidebar-item">🏠 Dashboard</div>
   <div class="sidebar-section">Payroll</div>
-  <div class="sidebar-item active">⚖️ Rekonsiliasi</div>
+  <div class="sidebar-item active">⚖️ BPJS Checking</div>
   <div class="sidebar-item">📋 List Karyawan</div>
 </div>
 
@@ -143,12 +143,8 @@ tbody td.center{text-align:center}
           </select>
         </div>
         <div class="filter-group">
-          <label>Periode</label>
-          <input type="month" id="selPeriode" value="2025-09" style="width:160px">
-        </div>
-        <div class="filter-group hidden" id="grpCutoff">
-          <label>Tanggal Cut Off</label>
-          <input type="number" id="cutoff" value="20" min="1" max="31" style="width:110px"/>
+          <label id="lblPeriode">Periode</label>
+          <input type="month" id="selPeriode" value="2025-09" style="width:165px">
         </div>
         <button class="btn-search" onclick="applyFilter()">🔍 Tampilkan</button>
       </div>
@@ -189,6 +185,7 @@ tbody td.center{text-align:center}
 
     <!-- Table -->
     <div id="tableSection" class="table-section hidden">
+      <div style="padding:16px 20px 0; font-size:15px; font-weight:700; color:#1a2332">Rekonsiliasi</div>
       <div class="table-toolbar">
         <div class="show-entries">Tampilkan
           <select onchange="changeShow(this.value)"><option>5</option><option>10</option><option>25</option></select>
@@ -262,6 +259,21 @@ const employees = [
   {nama:'Hendra Wijaya',   nik:'36912480', dept:'Logistik'},
   {nama:'Nur Hasanah',     nik:'48302615', dept:'Finance'},
   {nama:'Doni Pratama',    nik:'57193826', dept:'IT'},
+  {nama:'Eko Prasetyo',    nik:'62019485', dept:'Gudang'},
+  {nama:'Maya Indah',      nik:'73928154', dept:'Purchasing'},
+  {nama:'Taufik Ismail',   nik:'84736291', dept:'Produksi'},
+  {nama:'Yulianti',        nik:'95847362', dept:'Admin'},
+  {nama:'Andi Wijaya',     nik:'10293847', dept:'Produksi'},
+  {nama:'Siska Putri',     nik:'21304958', dept:'Logistik'},
+  {nama:'Bambang Heru',    nik:'32415069', dept:'Security'},
+  {nama:'Ani Suryani',     nik:'43526170', dept:'Maintenance'},
+  {nama:'Dedi Kurniawan',  nik:'54637281', dept:'Produksi'},
+  {nama:'Linda Sari',      nik:'65748392', dept:'Finance'},
+  {nama:'Reza Fahlevi',    nik:'76859403', dept:'IT'},
+  {nama:'Putri Wahyuni',   nik:'87960514', dept:'Marketing'},
+  {nama:'Adi Saputra',     nik:'98071625', dept:'Produksi'},
+  {nama:'Ratna Juwita',    nik:'09182736', dept:'Logistik'},
+  {nama:'Hadi Santoso',    nik:'11224455', dept:'Gudang'},
 ];
 
 // Mock modal detail data per category
@@ -313,7 +325,28 @@ let activeDropdownRow = null;
 
 function onFilterChange(){
   const bpjs = document.getElementById('selBpjs').value;
-  document.getElementById('grpCutoff').classList.toggle('hidden', bpjs !== 'tk');
+  const inputPeriode = document.getElementById('selPeriode');
+  const labelPeriode = document.getElementById('lblPeriode');
+
+  if(bpjs === 'tk') {
+    // Ubah jadi full date picker untuk TK
+    inputPeriode.type = 'date';
+    labelPeriode.textContent = 'Periode Cut Off';
+    // Default ke tanggal 20 jika baru pindah
+    if(inputPeriode.value.length <= 7) {
+      inputPeriode.value = inputPeriode.value + '-20';
+    }
+    inputPeriode.style.width = '165px';
+  } else {
+    // Balik ke month picker untuk Kesehatan
+    inputPeriode.type = 'month';
+    labelPeriode.textContent = 'Periode';
+    // Trim tanggal jika ada
+    if(inputPeriode.value.length > 7) {
+      inputPeriode.value = inputPeriode.value.substring(0,7);
+    }
+    inputPeriode.style.width = '165px';
+  }
 }
 
 function applyFilter(){
@@ -328,10 +361,17 @@ function applyFilter(){
   document.getElementById('cardTK').classList.add('hidden');
   if(bpjs==='kesehatan') document.getElementById('cardKesehatan').classList.remove('hidden');
   if(bpjs==='tk')        document.getElementById('cardTK').classList.remove('hidden');
-  document.getElementById('tableSection').classList.remove('hidden');
-  document.getElementById('bottomActions').classList.remove('hidden');
-  renderTable();
-  updateCalculatedTotals();
+
+  // Hide table if BPJS TK
+  if(bpjs === 'tk') {
+    document.getElementById('tableSection').classList.add('hidden');
+    document.getElementById('bottomActions').classList.add('hidden');
+  } else {
+    document.getElementById('tableSection').classList.remove('hidden');
+    document.getElementById('bottomActions').classList.remove('hidden');
+    renderTable();
+    updateCalculatedTotals();
+  }
 }
 
 function renderTable(){
