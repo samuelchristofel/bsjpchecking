@@ -96,6 +96,45 @@ tbody td{padding:12px 14px;vertical-align:middle}
 .badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600}
 .badge-draft{background:#fef9c3;color:#a16207}
 .badge-completed{background:#dcfce7;color:#15803d}
+
+/* Toast Styles */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-left: 4px solid #166935;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+  padding: 12px 20px;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  color: #1a2332;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 280px;
+  transform: translateX(120%);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s;
+  opacity: 0;
+}
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+.toast-success {
+  border-left-color: #22c55e;
+}
+.toast-error {
+  border-left-color: #ef4444;
+}
+.toast-info {
+  border-left-color: #3b82f6;
+}
+.toast-icon {
+  font-size: 16px;
+}
+.toast-success .toast-icon { color: #22c55e; }
+.toast-error .toast-icon { color: #ef4444; }
+.toast-info .toast-icon { color: #3b82f6; }
 </style>
 </head>
 <body>
@@ -261,8 +300,8 @@ tbody td{padding:12px 14px;vertical-align:middle}
       </div>
 
       <div id="bottomActions" class="bottom-actions hidden">
-        <button class="btn-outline">Save as Draft</button>
-        <button class="btn-primary">🔒 Submit / Finalize</button>
+        <button class="btn-outline" onclick="saveChecking('Draft')">Save as Draft</button>
+        <button class="btn-primary" onclick="saveChecking('Completed')">🔒 Submit / Finalize</button>
       </div>
     </div>
 
@@ -301,12 +340,18 @@ const employees = [
   {nama:'Eko Prasetyo', nik:'62019485', dept:'Gudang'},
 ];
 
+let checkingList = [
+  { id: 1, type: 'kesehatan', site: 'AAP', periode: '2025-09', status: 'Completed' },
+  { id: 2, type: 'tk', site: 'AAS', periode: '2025-08-20', status: 'Draft' }
+];
+
 let tableData = [
   {nama:'Budi Santoso', nik:'12345678', dept:'Produksi', adj:'+', remark:'New entry'},
   {nama:'Siti Aminah',  nik:'87654321', dept:'Logistik', adj:'-', remark:'Correction'},
 ];
 
 const baseTotals = { kesehatan: 250, tk: 250 };
+let currentEditingId = null;
 
 // View Switching
 function showDetail(isAdd, bpjs='', site='', periode=''){
@@ -318,9 +363,10 @@ function showDetail(isAdd, bpjs='', site='', periode=''){
     document.getElementById('selBpjs').value = bpjs;
     document.getElementById('selSite').value = site;
     onFilterChange();
-    document.getElementById('selPeriode').value = periode;
+    setPeriode(periode);
     applyFilter();
   } else {
+    currentEditingId = null;
     resetDetail();
   }
 }
@@ -338,7 +384,10 @@ function resetDetail(){
   document.getElementById('infoCards').classList.add('hidden');
   document.getElementById('tableSection').classList.add('hidden');
   document.getElementById('bottomActions').classList.add('hidden');
-  tableData = [];
+  tableData = [
+    {nama:'Budi Santoso', nik:'12345678', dept:'Produksi', adj:'+', remark:'New entry'},
+    {nama:'Siti Aminah',  nik:'87654321', dept:'Logistik', adj:'-', remark:'Correction'},
+  ];
 }
 
 // Logic Detail
@@ -429,20 +478,27 @@ document.addEventListener('click', function(e){
   }
 });
 
-function onFilterChange(){
-  const bpjs = document.getElementById('selBpjs').value;
-  const grpCutoff = document.getElementById('grpCutoff');
-
-  // Sembunyikan hasil lama
-  document.getElementById('infoCards').classList.add('hidden');
-  document.getElementById('tableSection').classList.add('hidden');
-  document.getElementById('bottomActions').classList.add('hidden');
-
-  if(bpjs === 'tk') {
-    grpCutoff.classList.remove('hidden');
-    updateDays();
-  } else {
-    grpCutoff.classList.add('hidden');
+function setPeriode(periodeStr) {
+  if (!periodeStr) return;
+  const parts = periodeStr.split('-');
+  const y = parseInt(parts[0]);
+  const m = parseInt(parts[1]);
+  if (isNaN(y) || isNaN(m)) return;
+  pYear = y;
+  pMonth = m;
+  const mm = m < 10 ? '0' + m : m;
+  document.getElementById('valPeriode').value = `${y}-${mm}`;
+  document.getElementById('displayPeriode').textContent = `${monthNames[m-1]} ${y}`;
+  
+  if (parts.length === 3) {
+    const day = parseInt(parts[2]);
+    const inputTanggal = document.getElementById('selTanggal');
+    const lastDay = new Date(y, m, 0).getDate();
+    inputTanggal.min = `${y}-${mm}-01`;
+    inputTanggal.max = `${y}-${mm}-${lastDay}`;
+    const dd = day < 10 ? '0' + day : day;
+    inputTanggal.value = `${y}-${mm}-${dd}`;
+    document.getElementById('displayTanggal').textContent = day;
   }
 }
 
@@ -480,7 +536,7 @@ function applyFilter(){
 
   if(bpjs === 'tk'){
     document.getElementById('tableSection').classList.add('hidden');
-    document.getElementById('bottomActions').classList.add('hidden');
+    document.getElementById('bottomActions').classList.remove('hidden');
   } else {
     document.getElementById('tableSection').classList.remove('hidden');
     document.getElementById('bottomActions').classList.remove('hidden');
@@ -491,14 +547,16 @@ function applyFilter(){
 
 function updateCalculatedTotals(){
   const bpjs = document.getElementById('selBpjs').value;
+  const karyawanKeluar = 5; // Karyawan keluar bulan sebelumnya
   let delta = 0;
-  tableData.forEach(r => { if(r.adj==='+') delta++; else if(r.adj==='-') delta--; });
-  const final = baseTotals[bpjs || 'kesehatan'] + delta;
   
-  if(bpjs === 'kesehatan'){
+  if (bpjs === 'kesehatan') {
+    tableData.forEach(r => { if(r.adj==='+') delta++; else if(r.adj==='-') delta--; });
+    const final = baseTotals['kesehatan'] - karyawanKeluar + delta;
     const el = document.querySelector('#cardKesehatan .info-row:nth-child(5) .info-val');
     if(el) el.innerHTML = `<span class="badge-down">▼</span>${final}`;
-  } else {
+  } else if (bpjs === 'tk') {
+    const final = baseTotals['tk'] - karyawanKeluar;
     const el = document.getElementById('tk-total');
     if(el) el.textContent = final;
   }
@@ -589,6 +647,140 @@ function openModal(cat){
 
 function closeModal(){ document.getElementById('detailModal').classList.add('hidden'); }
 
+// Dynamic List Rendering
+function formatPeriodeDisplay(periodeStr) {
+  if (!periodeStr) return '';
+  const parts = periodeStr.split('-');
+  const y = parseInt(parts[0]);
+  const m = parseInt(parts[1]);
+  if (isNaN(y) || isNaN(m)) return periodeStr;
+  return `${monthNames[m-1]} ${y}`;
+}
+
+function renderList() {
+  const tbody = document.getElementById('listTableBody');
+  tbody.innerHTML = '';
+  checkingList.forEach(item => {
+    const tr = document.createElement('tr');
+    
+    let badgeClass = 'badge-draft';
+    let statusText = 'Draft';
+    if (item.status === 'Completed') {
+      badgeClass = 'badge-completed';
+      statusText = 'Completed';
+    }
+    
+    const typeLabel = item.type === 'kesehatan' ? 'BPJS Kesehatan' : 'BPJS TK';
+    
+    tr.innerHTML = `
+      <td>${typeLabel}</td>
+      <td>${item.site}</td>
+      <td>${formatPeriodeDisplay(item.periode)}</td>
+      <td><span class="badge ${badgeClass}">${statusText}</span></td>
+      <td class="action-cell">
+        <button class="action-btn-circle btn-edit" onclick="editCheckingItem(${item.id})"><i class="fas fa-pen-to-square"></i></button>
+        <button class="action-btn-circle btn-primary" style="background:#15803d" onclick="exportToExcel('${typeLabel}', '${item.site}', '${item.periode}')"><i class="fas fa-file-excel"></i></button>
+        <button class="action-btn-circle btn-delete" onclick="deleteCheckingItem(${item.id})"><i class="fas fa-trash-can"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function editCheckingItem(id) {
+  const item = checkingList.find(i => i.id === id);
+  if (!item) return;
+  currentEditingId = id;
+  showDetail(false, item.type, item.site, item.periode);
+}
+
+function deleteCheckingItem(id) {
+  if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+    checkingList = checkingList.filter(i => i.id !== id);
+    renderList();
+    showToast('success', 'Data berhasil dihapus');
+  }
+}
+
+function exportToExcel(type, site, periode) {
+  showToast('success', `Exporting ${type} ${site} (${formatPeriodeDisplay(periode)}) to Excel...`);
+}
+
+function saveChecking(status) {
+  const bpjs = document.getElementById('selBpjs').value;
+  const site = document.getElementById('selSite').value;
+  let periode = document.getElementById('valPeriode').value;
+  
+  if (!bpjs || !periode) {
+    showToast('error', 'Harap lengkapi filter terlebih dahulu!');
+    return;
+  }
+  
+  if (bpjs === 'tk') {
+    const day = document.getElementById('displayTanggal').textContent;
+    const formattedDay = parseInt(day) < 10 ? '0' + parseInt(day) : day;
+    periode = `${periode}-${formattedDay}`;
+  }
+  
+  if (currentEditingId !== null) {
+    const item = checkingList.find(i => i.id === currentEditingId);
+    if (item) {
+      item.type = bpjs;
+      item.site = site;
+      item.periode = periode;
+      item.status = status;
+    }
+  } else {
+    const nextId = checkingList.length > 0 ? Math.max(...checkingList.map(i => i.id)) + 1 : 1;
+    checkingList.push({
+      id: nextId,
+      type: bpjs,
+      site: site,
+      periode: periode,
+      status: status
+    });
+  }
+  
+  renderList();
+  showList();
+  
+  const statusMsg = status === 'Completed' ? 'berhasil disubmit & difinalisasi!' : 'berhasil disimpan sebagai draft!';
+  showToast('success', `Data BPJS ${bpjs === 'kesehatan' ? 'Kesehatan' : 'TK'} ${statusMsg}`);
+}
+
+// Toast System
+function showToast(type, message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  let icon = 'fa-circle-check';
+  if (type === 'error') icon = 'fa-circle-xmark';
+  if (type === 'info') icon = 'fa-circle-info';
+  
+  toast.innerHTML = `
+    <i class="fas ${icon} toast-icon"></i>
+    <div style="flex:1">${message}</div>
+  `;
+  
+  container.appendChild(toast);
+  toast.offsetHeight; // trigger reflow
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.remove();
+    }, 350);
+  }, 3000);
+}
+
+window.onload = function() {
+  renderList();
+};
 </script>
+
+<!-- Toast Container -->
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
 </body>
 </html>
