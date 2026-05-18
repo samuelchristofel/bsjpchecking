@@ -301,7 +301,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
 
       <div id="bottomActions" class="bottom-actions hidden">
         <button class="btn-outline" onclick="saveChecking('Draft')">Save as Draft</button>
-        <button class="btn-primary" onclick="saveChecking('Completed')">🔒 Submit / Finalize</button>
+        <button class="btn-primary" onclick="saveChecking('Completed')">🔒 Submit</button>
       </div>
     </div>
 
@@ -744,7 +744,7 @@ function saveChecking(status) {
   renderList();
   showList();
   
-  const statusMsg = status === 'Completed' ? 'berhasil disubmit & difinalisasi!' : 'berhasil disimpan sebagai draft!';
+  const statusMsg = status === 'Completed' ? 'berhasil disubmit!' : 'berhasil disimpan sebagai draft!';
   showToast('success', `Data BPJS ${bpjs === 'kesehatan' ? 'Kesehatan' : 'TK'} ${statusMsg}`);
 }
 
