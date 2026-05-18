@@ -273,7 +273,7 @@ tbody td{padding:12px 14px;vertical-align:middle}
         </div>
         <div id="cardTK" class="info-card hidden">
           <div class="info-card-title">BPJS TK</div>
-          <div class="info-row" onclick="openModal('Total Karyawan')"><span>Total Karyawan</span><span id="tk-total">250</span></div>
+          <div class="info-row" onclick="openModal('Total Karyawan')"><span>Total Karyawan</span><span id="tk-total">245</span></div>
           <div class="info-row" onclick="openModal('Peserta BPJS TK')"><span>Peserta BPJS TK</span><span>200</span></div>
           <div class="info-row" onclick="openModal('Karyawan Masuk')"><span>Karyawan Masuk</span><span>45</span></div>
           <div class="info-row" onclick="openModal('Karyawan Keluar')"><span>Karyawan Keluar</span><span>5</span></div>
@@ -547,18 +547,48 @@ function applyFilter(){
 
 function updateCalculatedTotals(){
   const bpjs = document.getElementById('selBpjs').value;
-  const karyawanKeluar = 5; // Karyawan keluar bulan sebelumnya
   let delta = 0;
   
   if (bpjs === 'kesehatan') {
     tableData.forEach(r => { if(r.adj==='+') delta++; else if(r.adj==='-') delta--; });
-    const final = baseTotals['kesehatan'] - karyawanKeluar + delta;
-    const el = document.querySelector('#cardKesehatan .info-row:nth-child(5) .info-val');
-    if(el) el.innerHTML = `<span class="badge-down">▼</span>${final}`;
+    
+    // BPJS Kesehatan Rules Mock Variables
+    const karyawanExisting = 210;
+    const karyawanMasuk = 30;
+    const karyawanMasukNon = 15;
+    const karyawanKeluar = 5;
+    const karyawanExistingNon = 40;
+    
+    // Total Karyawan = Karyawan Existing + Karyawan Masuk + Karyawan Masuk (Non Perusahaan) – Karyawan Keluar
+    const totalKaryawan = karyawanExisting + karyawanMasuk + karyawanMasukNon - karyawanKeluar; // 250
+    
+    // Peserta BPJS Kesehatan (Non Perusahaan) = Karyawan Existing (Non Perusahaan) + Karyawan Masuk (Non Perusahaan)
+    const pesertaNon = karyawanExistingNon + karyawanMasukNon; // 55
+    
+    // Total Peserta BPJS Kesehatan = Total Karyawan – Peserta BPJS Kesehatan (Non Perusahaan) + Rekonsiliasi (delta)
+    const totalPeserta = totalKaryawan - pesertaNon + delta; // 195 + delta
+    
+    // Update DOM
+    const elKaryawan = document.querySelector('#cardKesehatan .info-row:nth-child(5) .info-val');
+    if(elKaryawan) elKaryawan.innerHTML = `<span class="badge-down">▼</span>${totalKaryawan}`;
+    
+    const elPesertaNon = document.querySelector('#cardKesehatan .info-row:nth-child(6) .info-val');
+    if(elPesertaNon) elPesertaNon.innerHTML = `<span class="badge-down">▼</span>${pesertaNon}`;
+    
+    const elTotalPeserta = document.querySelector('#cardKesehatan .info-row:nth-child(7) .info-val');
+    if(elTotalPeserta) elTotalPeserta.innerHTML = `<span class="badge-down">▼</span>${totalPeserta}`;
+    
   } else if (bpjs === 'tk') {
-    const final = baseTotals['tk'] - karyawanKeluar;
+    // BPJS TK Rules:
+    const pesertaTK = 200;
+    const karyawanMasukTK = 45;
+    // Karyawan Keluar (5) tidak termasuk dalam formula penghitungan Total Karyawan
+    
+    // Total Karyawan didapat dari Peserta BPJS TK + Karyawan yang Masuk di bulan tersebut.
+    const totalKaryawanTK = pesertaTK + karyawanMasukTK; // 200 + 45 = 245
+    
     const el = document.getElementById('tk-total');
-    if(el) el.textContent = final;
+    if(el) el.textContent = totalKaryawanTK;
   }
 }
 
@@ -639,9 +669,56 @@ function openModal(cat){
   document.getElementById('modalTitle').textContent = cat;
   const tbody = document.getElementById('modalTableBody');
   tbody.innerHTML = '';
-  employees.slice(0,5).forEach(e => {
-    tbody.innerHTML += `<tr><td>${cat}</td><td>${e.nama}</td><td>${e.nik}</td><td>${e.dept}</td></tr>`;
-  });
+  
+  if (cat === 'Total Peserta BPJS Kesehatan') {
+    // Base participants
+    let list = [
+      {nama:'Dewi Lestari', nik:'55667788', dept:'Finance'},
+      {nama:'Rizky Maulana', nik:'99887766', dept:'IT'},
+      {nama:'Fauzi Hidayat', nik:'13579246', dept:'Marketing'},
+      {nama:'Rina Kusuma',  nik:'24681357', dept:'Produksi'},
+      {nama:'Hendra Wijaya', nik:'36912480', dept:'Logistik'},
+      {nama:'Nur Hasanah',  nik:'48302615', dept:'Finance'},
+      {nama:'Doni Pratama', nik:'57193826', dept:'IT'},
+      {nama:'Eko Prasetyo', nik:'62019485', dept:'Gudang'},
+      {nama:'Siti Aminah',  nik:'87654321', dept:'Logistik'}
+    ];
+    
+    // Process adjustments from tableData
+    tableData.forEach(adjItem => {
+      if (!adjItem.nama) return; // skip empty rows
+      if (adjItem.adj === '+') {
+        // If not already in list, add it
+        if (!list.some(p => p.nik === adjItem.nik)) {
+          list.push({
+            nama: adjItem.nama,
+            nik: adjItem.nik,
+            dept: adjItem.dept,
+            isAdjAdded: true
+          });
+        }
+      } else if (adjItem.adj === '-') {
+        // Remove from base participants if matched by NIK
+        list = list.filter(p => p.nik !== adjItem.nik);
+      }
+    });
+    
+    list.forEach(e => {
+      const tag = e.isAdjAdded ? ' <span class="badge badge-completed" style="background:rgba(16,185,129,0.1); color:#10b981; font-size:10px; margin-left:8px; padding:2px 6px">Rekonsiliasi (+)</span>' : '';
+      tbody.innerHTML += `<tr>
+        <td>${cat}</td>
+        <td>${e.nama}${tag}</td>
+        <td>${e.nik}</td>
+        <td>${e.dept}</td>
+      </tr>`;
+    });
+  } else {
+    // Default modal behavior
+    employees.slice(0,5).forEach(e => {
+      tbody.innerHTML += `<tr><td>${cat}</td><td>${e.nama}</td><td>${e.nik}</td><td>${e.dept}</td></tr>`;
+    });
+  }
+  
   document.getElementById('detailModal').classList.remove('hidden');
 }
 
